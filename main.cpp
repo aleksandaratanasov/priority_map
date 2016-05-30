@@ -1,113 +1,139 @@
 #include <iostream>
-#include <string>
-#include <sstream>
-
-using std::string;
-using std::stringstream;
-using std::cout;
-using std::endl;
-
-#include <iostream>
 #include <map>
 #include <vector>
+#include <string>
+#include <algorithm>
+#include <memory>
 
-typedef int Priority;
-typedef int Mode_ID;
+// TODO Add modes and override run(); using static_cast or dynamic_cast add different Mode-types to the map
+// TODO Add mode execution class
+// TODO Clean properly (move to shared_ptr or even to boost for the pointers -> a bit of an overkill to take boost just for that :D)
 
-typedef struct {
-  Priority priority;
-  std::string name;
-} Mode;
+class Mode
+{
+    std::string name;
+    int priority;
+  public:
+    Mode() {}
+    Mode(const std::string &_name, const int _priority)
+      : name(_name),
+        priority(_priority)
+    {
+    }
 
-// Outer map - PriorityMap - contains entries where a priority is the keys
-// Inner map - PriorityGroup - contains entries where an automatically generated key is used to an entry's value - a Mode - with all modes having the same priority
-typedef std::map<Priority, std::map<Mode_ID, Mode> > PriorityMap;
-typedef std::map<Mode_ID, Mode> PriorityGroup;
-typedef std::pair<Priority, PriorityGroup> PriorityMapInsertion;
+    void setName(const std::string &value)
+    {
+      name = value;
+    }
 
-bool insertMode(PriorityMap& priorityMap, Mode *mode) {
-  
-  auto foundPrioEntry = priorityMap.find(mode->priority);
-  bool createdPriorityGroupOkay = false;
-  
-  // If no priority equal to mode->priority is available create a new PriorityGroup
-  if(foundPrioEntry == priorityMap.end())
-    createdPriorityGroupOkay = priorityMap.insert(std::make_pair<Priority, PriorityGroup>(mode->priority, PriorityGroup()));
-  
-  //if(!createdPriorityGroupOkay) return false;
-  
-  // If PriorityGroup was succcessfully created attempt to add mode to it
-  PriorityGroup modes = foundPrioEntry->second(); // Retrieve map of modes with same priority
-  bool insertOkay = false;
-  int key = 0;
-  for(; key < modes.rbegin()->first(); key++)  { // modes.rbegin() returns the entry at the end of the ModeMap which contains the biggest key
-    // Start from the first key inside the ModeGroup map and continue until the end is reached (and insertion has failed) or an available key was found
-    const Mode_ID modeKey = key;
-    insertOkay = modes.insert(std::pair<modeKey, mode>); // Attempt to insert with current key
-  }
-  
-  // If insertion has failed (due to lack of available keys)
-  if(!insertOkay) {
-    // Add a new priority (=key)
-    const Mode_ID modeKey = key++;
-    // And attempt to insert given mode into ModeGroup map
-    insertOkay = modes.insert(std::pair<modeKey, mode>);
-  }
-  
-  return insertOkay;
+    std::string getName() const
+    {
+      return name;
+    }
+
+    int getPriority() const
+    {
+      return priority;
+    }
+
+    void setPriority(int value)
+    {
+      priority = value;
+    }
+
+    //virtual void run() = 0;
+};
+
+class PriorityMap
+{
+    typedef std::pair<int, Mode *> ModeEntry;
+    typedef std::map<int, Mode *> PriorityGroup;
+    typedef PriorityGroup* PriorityGroup_Ptr;
+    typedef std::map<int, PriorityGroup_Ptr> Priority;
+    typedef Priority* Priority_Ptr;
+
+    Priority_Ptr priorities;
+  public:
+    PriorityMap() {
+      priorities = new Priority();
+    }
+
+    ~PriorityMap() {
+      // http://stackoverflow.com/a/19970551/1559401
+      // for each entry of priorities: priorityGroup.second (get prio group)
+      // for each prio group delete modeEntry.second (--->Mode *)
+      // delete priorityGroup
+      // delete priorities
+
+      delete priorities;
+    }
+
+    void print() {
+      for(const auto& priorityGroup : *priorities) {
+        std::cout << "[" << priorityGroup.first << "]:" << std::endl;
+        for(auto& modeEntry : *(priorityGroup.second))
+          std::cout << "\t <" << modeEntry.first << " : \"" << modeEntry.second->getName() << "\">" << std::endl;
+      }
+    }
+
+    bool insert(Mode *mode) {
+      if(!mode) return false;
+
+      PriorityGroup_Ptr priorityGroup;
+      // Try to find a priority group for the given mode
+      auto foundPriorityGroup = priorities->find(mode->getPriority());
+      // If the end was reached and no group was found, a new one is created
+      if(foundPriorityGroup == priorities->end()) {
+        // Create new priority group
+        priorityGroup = new PriorityGroup();
+        // Insert the new priority group with a key equal to the given mode's priority
+        std::pair<int, PriorityGroup_Ptr> priorityGroupEntry(mode->getPriority(), priorityGroup);
+        if(!priorities->insert(priorityGroupEntry).second) return false;
+      }
+      else priorityGroup = foundPriorityGroup->second;
+
+      bool entryInserted = false;
+      int key = 0;
+      // Generate new key - iterate from 0 to the highest key in the priority group and assign the first available one to the new mode entry
+      // Break if entry insertion was successful or the end of the priority group has been reached
+      if(priorityGroup->size())
+        for(; key <= priorityGroup->rbegin()->first || entryInserted; ++key) {
+          // Try inserting new entry with current key
+          entryInserted = priorityGroup->insert(ModeEntry(key, mode)).second;
+        }
+
+      // If end of priority group has been reached but entry insertion has failed we try one more time by adding a new key
+      if(!entryInserted) {
+        key = key++;
+        return priorityGroup->insert(ModeEntry(key, mode)).second;
+      }
+
+    }
+};
+
+void insert(PriorityMap *priorityMap, Mode *mode) {
+  if(!priorityMap || !mode) return;
+
+  if(priorityMap->insert(mode)) std::cout << "Inserted \"" << mode->getName() << "\" with priority " << mode->getPriority() << " SUCCESSFUL" << std::endl;
+  else std::cout << "Inserted \"" << mode->getName() << "\" with priority " << mode->getPriority() << " FAILED" << std::endl;
+
 }
 
 int main ()
 {
-  std::map<char,int> mymap;
+  PriorityMap *priorities = new PriorityMap();
+  Mode *m1 = new Mode("m1", 0);
+  insert(priorities, m1);
 
-  // first insert function version (single parameter):
-  std::cout << "Inserting ['a', 1], ['a', 2] and ['b', 2] one after the other" << std::endl;
-  mymap.insert( std::pair<char,int>('a',1) );
-  mymap.insert( std::pair<char,int>('a',1) );
-  mymap.insert( std::pair<char,int>('b',2) );
-  std::cout << "Insering bulk items from ['c',3] to ['z',26]" << std::endl;
-  std::vector<std::pair<char,int> > bulk_items;
-  std::cout << "Filling vector with items: ";
-  for(int i = 0; i < 24; ++i) {
-    bulk_items.push_back(std::make_pair(char(i+99),i+3));
-    std::cout << "[" << char(i+99) << "," << i+3 << "] ";
-  }
-  std::cout << "\nInserting vector into map" << std::endl;
-  mymap.insert(bulk_items.begin(), bulk_items.end());
+  Mode *m2 = new Mode("m2", 0);
+  insert(priorities, m2);
 
-  std::pair<std::map<char,int>::iterator,bool> ret;
-  ret = mymap.insert ( std::pair<char,int>('z',500) );
-  if (ret.second==false) {
-    std::cout << "element 'z' already existed";
-    std::cout << " with a value of " << ret.first->second << '\n';
-  }
+  Mode *m3 = new Mode("m3", 1);
+  insert(priorities, m3);
 
-  // second insert function version (with hint position):
-  std::map<char,int>::iterator it = mymap.begin();
-  mymap.insert(it, std::pair<char,int>('b',300));  // max efficiency inserting
-  mymap.insert(it, std::pair<char,int>('c',400));  // no max efficiency inserting
+  priorities->print();
 
-  // third insert function version (range insertion):
-  std::map<char,int> anothermap;
-  anothermap.insert(mymap.find('k'),mymap.find('t'));
-
-  // showing contents:
-  std::cout << "mymap contains:\n";
-  for (it=mymap.begin(); it!=mymap.end(); ++it)
-    std::cout << it->first << " => " << it->second << '\n';
-
-  std::cout << "anothermap contains:\n";
-  for (it=anothermap.begin(); it!=anothermap.end(); ++it)
-    std::cout << it->first << " => " << it->second << '\n';
-  
-  
-  // Priority 	- mode priority; entries with same priority can be accessed by their priority and the automatically generated mode_id
-  // Mode_ID 	- generated and assigned to every mode which is added; used to differentiate between modes with same priority
-  // Mode 	- contains a mode entry
-  PriorityMap priorities;
-  Mode m1 = {0, "m1"};
-  priorities.insert(priorities, &m1);
+  delete priorities;
 
   return 0;
 }
