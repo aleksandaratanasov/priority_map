@@ -22,8 +22,8 @@ typedef struct {
 // Outer map - PriorityMap - contains entries where a priority is the keys
 // Inner map - PriorityGroup - contains entries where an automatically generated key is used to an entry's value - a Mode - with all modes having the same priority
 typedef std::map<Priority, std::map<Mode_ID, Mode> > PriorityMap;
-typedef std::pair<Priority, PriorityGroup> PriorityMapInsertion;
 typedef std::map<Mode_ID, Mode> PriorityGroup;
+typedef std::pair<Priority, PriorityGroup> PriorityMapInsertion;
 
 bool insertMode(PriorityMap& priorityMap, Mode *mode) {
   
@@ -32,29 +32,24 @@ bool insertMode(PriorityMap& priorityMap, Mode *mode) {
   
   // If no priority equal to mode->priority is available create a new PriorityGroup
   if(foundPrioEntry == priorityMap.end())
-    createdPriorityGroupOkay = priorityMap.insert(
-      std::pair<Priority, PriorityGroup>(
-	mode->priority,
-	PriorityGroup()
-      )
-    );
+    createdPriorityGroupOkay = priorityMap.insert(std::make_pair<Priority, PriorityGroup>(mode->priority, PriorityGroup()));
   
   //if(!createdPriorityGroupOkay) return false;
   
   // If PriorityGroup was succcessfully created attempt to add mode to it
   PriorityGroup modes = foundPrioEntry->second(); // Retrieve map of modes with same priority
-  Mode_ID modeKey = 0;
   bool insertOkay = false;
   int key = 0;
   for(; key < modes.rbegin()->first(); key++)  { // modes.rbegin() returns the entry at the end of the ModeMap which contains the biggest key
     // Start from the first key inside the ModeGroup map and continue until the end is reached (and insertion has failed) or an available key was found
+    const Mode_ID modeKey = key;
     insertOkay = modes.insert(std::pair<modeKey, mode>); // Attempt to insert with current key
   }
   
   // If insertion has failed (due to lack of available keys)
   if(!insertOkay) {
     // Add a new priority (=key)
-    modeKey = key++;
+    const Mode_ID modeKey = key++;
     // And attempt to insert given mode into ModeGroup map
     insertOkay = modes.insert(std::pair<modeKey, mode>);
   }
