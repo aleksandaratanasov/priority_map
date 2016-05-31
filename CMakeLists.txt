@@ -1,8 +1,11 @@
 project(prioritymap_demo)
 cmake_minimum_required(VERSION 2.8)
 
-set(CMAKE_BUILD_TYPE Release)
+set(CMAKE_BUILD_TYPE Debug) # Release
 
+if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "4.9")
+  message(FATAL_ERROR "Insufficient gcc version. You need gcc 4.9")
+endif()
 set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++14 ${CMAKE_CXX_FLAGS}") # Requires C++14
 
 # Debug build
