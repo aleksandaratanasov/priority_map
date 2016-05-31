@@ -1,9 +1,9 @@
-project(PLAYGROUND)
+project(prioritymap_demo)
 cmake_minimum_required(VERSION 2.8)
 
 set(CMAKE_BUILD_TYPE Release)
 
-set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++14 ${CMAKE_CXX_FLAGS}")
+set(CMAKE_CXX_FLAGS "-fPIC -std=gnu++14 ${CMAKE_CXX_FLAGS}") # Requires C++14
 
 # Debug build
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -Wall -g -O0")
