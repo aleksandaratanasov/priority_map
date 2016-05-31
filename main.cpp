@@ -59,30 +59,28 @@ class PriorityMap
     }
 
     ~PriorityMap() {
-      // for each entry of priorities: priorityGroup.second (get prio group)
-      // for each prio group delete modeEntry.second (--->Mode *)
-      // delete priorityGroup
-      // delete priorities
-
       std::for_each(priorities->begin(), priorities->end(), [](auto priorityGroup) -> void {
         std::for_each(priorityGroup.second->begin(), priorityGroup.second->end(), [&priorityGroup](auto modeEntry) -> void { // [&priorityGroup] - used to capture priorityGroup (here by reference) from outer lambda so that it's visible in the inner lambda
-          std::cout << "Deleting mode \"" << modeEntry.second->getName() << "\" in priority group \"" << priorityGroup.first << "\"" << std::endl;
+          std::string name = modeEntry.second->getName();
           delete modeEntry.second;
+          std::cout << "Deleted mode \"" << name << "\" in priority group \"" << priorityGroup.first << "\"" << std::endl;
         });
 
-        std::cout << "Deleting priority group \"" << priorityGroup.first << "\"" << std::endl;
         delete priorityGroup.second;
+        std::cout << "Deleted priority group \"" << priorityGroup.first << "\"" << std::endl;
       });
 
       delete priorities;
     }
 
     void print() {
+      std::cout << "--------------------------------------------" << std::endl;
       for(const auto& priorityGroup : *priorities) {
-        std::cout << "[" << priorityGroup.first << "]:" << std::endl;
+        std::cout << "priority_group \"" << priorityGroup.first << "\"" << std::endl;
         for(auto& modeEntry : *(priorityGroup.second))
-          std::cout << "\t <" << modeEntry.first << " : \"" << modeEntry.second->getName() << "\">" << std::endl;
+          std::cout << "\t <mode_id \"" << modeEntry.first << "\" : mode_name \"" << modeEntry.second->getName() << "\">" << std::endl;
       }
+      std::cout << "--------------------------------------------" << std::endl;
     }
 
     bool insert(Mode *mode) {
