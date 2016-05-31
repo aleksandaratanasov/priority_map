@@ -1,3 +1,4 @@
-*kdev4*
 build/*
+!build/lib*.so
+!build/prioritymap_demo
 CMakeLists.txt.user
