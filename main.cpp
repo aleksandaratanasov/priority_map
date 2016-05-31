@@ -7,8 +7,8 @@
 
 // TODO Add modes and override run(); using static_cast or dynamic_cast add different Mode-types to the map
 // TODO Add mode execution class
-// TODO Clean properly (move to shared_ptr or even to boost for the pointers -> a bit of an overkill to take boost just for that :D)
-
+// TODO Clean properly - also change normal pointers to boost::smart pointers
+// TODO Use signals triggered from Mode to map to tell map that a mode execution has finished or timedout in which case it has to be deleted from map (if last mode in a PriorityGroup delete whole group)
 class Mode
 {
     std::string name;
@@ -59,11 +59,20 @@ class PriorityMap
     }
 
     ~PriorityMap() {
-      // http://stackoverflow.com/a/19970551/1559401
       // for each entry of priorities: priorityGroup.second (get prio group)
       // for each prio group delete modeEntry.second (--->Mode *)
       // delete priorityGroup
       // delete priorities
+
+      std::for_each(priorities->begin(), priorities->end(), [](auto priorityGroup) -> void {
+        std::for_each(priorityGroup.second->begin(), priorityGroup.second->end(), [&priorityGroup](auto modeEntry) -> void { // [&priorityGroup] - used to capture priorityGroup (here by reference) from outer lambda so that it's visible in the inner lambda
+          std::cout << "Deleting mode \"" << modeEntry.second->getName() << "\" in priority group \"" << priorityGroup.first << "\"" << std::endl;
+          delete modeEntry.second;
+        });
+
+        std::cout << "Deleting priority group \"" << priorityGroup.first << "\"" << std::endl;
+        delete priorityGroup.second;
+      });
 
       delete priorities;
     }
