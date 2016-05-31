@@ -9,13 +9,13 @@
 int main ()
 {
   PriorityMap *priorities = new PriorityMap();
-  Mode *m1 = new Mode("m1", 0);
+  ModeSleep *m1 = new ModeSleep("Sleep10", 0, 10);
   priorities->insert(m1);
 
-  Mode *m2 = new Mode("m2", 0);
+  ModeSleep *m2 = new ModeSleep("Sleep5", 0, 5);
   priorities->insert(m2);
 
-  Mode *m3 = new Mode("m3", 1);
+  ModeFactorial *m3 = new ModeFactorial("Factorial20", 1, 20);
   priorities->insert(m3);
 
   priorities->print();
