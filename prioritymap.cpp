@@ -87,22 +87,3 @@ Mode *PriorityMap::_find(const std::string &name)
 
   return nullptr;
 }
-
-// TODO find should return a vector of pointers since names are not unique which means that we can have multiple modes with the same name independent from
-// the priority group they belong to! Right now find() returns the first match!
-template<class T>
-T *PriorityMap::find(const std::string &name)
-{
-  Mode *foundMode = _find(name);
-  if(foundMode) {
-    T *foundModeCast = dynamic_cast<T *>(foundMode);
-    if(foundModeCast) {
-      std::cout << "Found mode \"" << foundModeCast->getName() << "\"" << std::endl;
-      return foundModeCast;
-    }
-    else {
-      std::cout << "Found mode \"" << foundMode->getName() << "\" however specified type is invalid! Returning NULL" << std::endl;
-      return nullptr;
-    }
-  }
-}

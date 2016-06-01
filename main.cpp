@@ -23,9 +23,9 @@ int main ()
 
   priorities->print();
 
-//  ModeSleep *foundM2 =  priorities->template find<ModeSleep>("Sleep5");
-//  if(foundM2)
-//    std::cout << "Found mode \"" << foundM2->getName() << "\" has time interval set to " << foundM2->getMilliseconds() << "ms" << std::endl;
+  ModeSleep *foundM2 =  priorities->template find<ModeSleep>("Sleep5");
+  if(foundM2)
+    std::cout << "Found mode \"" << foundM2->getName() << "\" has time interval set to " << foundM2->getMilliseconds() << "ms" << std::endl;
 
   //ModeSleep *foundM1 = priorities->find<ModeSleep>("Factorial20");
 
