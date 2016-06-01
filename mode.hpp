@@ -43,7 +43,7 @@ class ModeSleep : public Mode
     ModeSleep(const std::string &name, const int priority, const unsigned int ms);
     ~ModeSleep();
 
-    unsigned int getMicroseconds() const;
+    unsigned int getMilliseconds() const;
     void setMicroseconds(unsigned int ms);
 
     virtual void run() override;

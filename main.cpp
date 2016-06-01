@@ -1,5 +1,6 @@
 #include "prioritymap.hpp"
 #include <iostream>
+#include <exception>
 
 // TODO Add mode execution class
 // TODO Clean properly - also change normal pointers to boost::smart pointers
@@ -18,6 +19,12 @@ int main ()
   priorities->insert(m3);
 
   priorities->print();
+
+  ModeSleep *foundM2 =  priorities->template find<ModeSleep>("Sleep5");
+  if(foundM2)
+    std::cout << "Found mode \"" << foundM2->getName() << "\" has time interval set to " << foundM2->getMilliseconds() << "ms" << std::endl;
+
+  //ModeSleep *foundM1 = priorities->find<ModeSleep>("Factorial20");
 
   delete priorities;
 

@@ -52,7 +52,7 @@ ModeSleep::~ModeSleep()
 {
 }
 
-unsigned int ModeSleep::getMicroseconds() const
+unsigned int ModeSleep::getMilliseconds() const
 {
   return ms;
 }
@@ -64,8 +64,7 @@ void ModeSleep::setMicroseconds(unsigned int value)
 
 void ModeSleep::run()
 {
-  for(unsigned int i = 0; i < ms; ++i)
-    usleep(1);
+  usleep(ms*1000);
 }
 
 ModeFactorial::ModeFactorial()
