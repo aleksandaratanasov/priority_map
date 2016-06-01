@@ -33,7 +33,7 @@ void PriorityMap::print() {
 }
 
 // TODO Add support for unique keys for modes across ALL priority groups. Right now keys are unique only withing the boundries of their priority group
-bool PriorityMap::_insert(Mode *mode) {
+bool PriorityMap::_insert(Mode *mode, int &_id) {
   if(!mode) return false;
 
   PriorityGroup_Ptr priorityGroup;
@@ -62,18 +62,22 @@ bool PriorityMap::_insert(Mode *mode) {
   // If end of priority group has been reached but entry insertion has failed we try one more time by adding a new key
   if(!entryInserted) {
     key = key++;
-    return priorityGroup->insert(ModeEntry(key, mode)).second;
+    entryInserted = priorityGroup->insert(ModeEntry(key, mode)).second;
   }
+
+  if(entryInserted) mode->setId(key);
+  _id = mode->getId();
 
   return entryInserted;
 }
 
-void PriorityMap::insert(Mode *mode) {
-  if(_insert(mode)) std::cout << "Inserted \"" << mode->getName() << "\" with priority " << mode->getPriority() << " SUCCESSFUL" << std::endl;
-  else std::cout << "Inserted \"" << mode->getName() << "\" with priority " << mode->getPriority() << " FAILED" << std::endl;
+void PriorityMap::insert(Mode *mode, int &_id) {
+  if(_insert(mode, _id)) std::cout << "Inserted \"" << mode->getName() << "\" of priority " << mode->getPriority() << " SUCCESSFUL. Mode ID set to " << _id << std::endl;
+  else std::cout << "Inserted \"" << mode->getName() << "\" of priority " << mode->getPriority() << " FAILED" << std::endl;
 
 }
 
+// TODO Add support for finding a mode based on its ID
 Mode *PriorityMap::_find(const std::string &name)
 {
   for(const auto& priorityGroup : *priorities)

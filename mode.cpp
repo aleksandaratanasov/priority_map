@@ -7,8 +7,9 @@ Mode::Mode()
 }
 
 Mode::Mode(const std::string &_name, const int _priority)
-  : name(_name),
-    priority(_priority)
+    : name(_name),
+    priority(_priority),
+    id(-1)
 {
 }
 
@@ -34,6 +35,16 @@ int Mode::getPriority() const
 void Mode::setPriority(int value)
 {
   priority = value;
+}
+
+int Mode::getId() const
+{
+    return id;
+}
+
+void Mode::setId(int value)
+{
+    id = value;
 }
 
 ModeSleep::ModeSleep()

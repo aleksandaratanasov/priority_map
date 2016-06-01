@@ -5,6 +5,7 @@
 
 class Mode
 {
+    int id;           ///< The ID is set upon insertion into a priority group. Default: -1
     std::string name; ///< Mode's name
     int priority;     ///< Mode's priority used for storing the Mode in a specific priority group in the priority map. Default: 0
   public:
@@ -22,6 +23,9 @@ class Mode
 
     int getPriority() const;
     void setPriority(int value);
+
+    int getId() const;
+    void setId(int value);
 
     ///
     /// \brief run is the part of a Mode which is executed by the ModeExecutor

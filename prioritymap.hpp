@@ -15,14 +15,14 @@ class PriorityMap
 
     Priority_Ptr priorities;
 
-    bool _insert(Mode *mode);
+    bool _insert(Mode *mode, int &_id);
     Mode *_find(const std::string &name);
   public:
     PriorityMap();
     ~PriorityMap();
 
     void print();
-    void insert(Mode *mode);
+    void insert(Mode *mode, int &_id);
     template<class T> T *find(const std::string &name);
 };
 
